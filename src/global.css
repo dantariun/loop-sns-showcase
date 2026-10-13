@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * 디자인 토큰 — 색은 전부 여기서만 정의한다.
+ *
+ * 값을 `R G B` 로 적는 이유: tailwind.config.js 가 `rgb(var(--x) / <alpha-value>)` 로
+ * 읽어가므로 `bg-brand/10` 같은 투명도 유틸리티가 그대로 동작한다.
+ *
+ * 다크 테마는 같은 토큰 이름을 다시 정의하는 것으로 끝난다 —
+ * 컴포넌트는 `bg-surface` 하나만 쓰고 테마를 알지 못한다.
+ */
+@layer base {
+  :root {
+    /* 브랜드 */
+    --color-brand: 91 91 245; /* Loop 인디고 */
+    --color-brand-soft: 237 237 254;
+    --color-like: 236 76 76;
+    --color-badge: 244 196 48;
+
+    /* 서피스 */
+    --color-bg: 255 255 255;
+    --color-surface: 247 247 249;
+    --color-border: 235 235 240;
+
+    /* 텍스트 */
+    --color-text: 20 20 26;
+    --color-text-secondary: 68 68 76;
+    --color-text-hint: 138 138 147;
+    --color-text-disabled: 199 199 206;
+
+    /* 말풍선 */
+    --color-bubble-peer: 240 240 244;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-brand: 128 128 250;
+      --color-brand-soft: 38 38 66;
+      --color-like: 242 108 108;
+      --color-badge: 246 208 86;
+
+      --color-bg: 16 16 20;
+      --color-surface: 27 27 33;
+      --color-border: 44 44 52;
+
+      --color-text: 240 240 245;
+      --color-text-secondary: 186 186 196;
+      --color-text-hint: 130 130 140;
+      --color-text-disabled: 84 84 94;
+
+      --color-bubble-peer: 40 40 48;
+    }
+  }
+}
