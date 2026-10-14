@@ -55,10 +55,11 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "biome check src",
+    "lint": "biome check src scripts",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "format": "biome check --write src"
+    "format": "biome check --write src scripts",
+    "stats": "node scripts/stats.js --write"
   },
   "private": true
 }
