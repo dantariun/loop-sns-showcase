@@ -75,6 +75,26 @@ const feed: FeedRepository = {
   async bookmarks() {
     return delay(db.posts.filter((p) => p.bookmarked).sort(byNewest));
   },
+
+  async createPost(draft) {
+    const post: Post = {
+      id: `me_${Date.now()}`,
+      author: db.me,
+      body: draft.body,
+      mediaUrls: draft.mediaIds,
+      hashtags: draft.hashtags,
+      locationTag: draft.locationTag,
+      likeCount: 0,
+      commentCount: 0,
+      liked: false,
+      bookmarked: false,
+      createdAt: Date.now(),
+    };
+    db.posts = [post, ...db.posts];
+    db.comments.set(post.id, []);
+    db.me = { ...db.me, postCount: db.me.postCount + 1 };
+    return delay(post);
+  },
 };
 
 const users: UserRepository = {

@@ -11,6 +11,15 @@ import type { AppNotification, ChatThread, Comment, Message, Post, User } from '
  * 로딩·에러·재시도 경로가 실제와 같은 모양으로 검증된다.
  */
 
+/** 글쓰기 화면이 모아 보내는 초안 */
+export interface NewPostDraft {
+  /** 선택한 미디어 id 목록 — 첫 장이 대표 */
+  mediaIds: string[];
+  body: string;
+  hashtags: string[];
+  locationTag: string | null;
+}
+
 export interface FeedRepository {
   feed(): Promise<Post[]>;
   post(id: string): Promise<Post | null>;
@@ -22,6 +31,8 @@ export interface FeedRepository {
   postsBy(userId: string): Promise<Post[]>;
   /** 북마크한 게시물 */
   bookmarks(): Promise<Post[]>;
+  /** 새 게시물 등록 — 작성자는 항상 나 */
+  createPost(draft: NewPostDraft): Promise<Post>;
 }
 
 export interface UserRepository {

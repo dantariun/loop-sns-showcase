@@ -113,3 +113,51 @@ describe('SearchRepository', () => {
     expect(explore.every((p) => p.mediaUrls.length > 0)).toBe(true);
   });
 });
+
+describe('createPost', () => {
+  it('새 글은 내가 작성자이고 피드 맨 앞에 선다', async () => {
+    const created = await feed.createPost({
+      mediaIds: ['m_gallery_1', 'm_gallery_2'],
+      body: '첫 글 #테스트',
+      hashtags: ['테스트'],
+      locationTag: '성수동',
+    });
+
+    expect(created.author.isMe).toBe(true);
+    expect(created.mediaUrls).toEqual(['m_gallery_1', 'm_gallery_2']);
+    expect(created.locationTag).toBe('성수동');
+
+    const posts = await feed.feed();
+    expect(posts[0]?.id).toBe(created.id);
+  });
+
+  it('등록하면 내 게시물 수가 늘고 프로필 그리드에 들어간다', async () => {
+    const before = await users.me();
+    const created = await feed.createPost({
+      mediaIds: ['m_gallery_3'],
+      body: '두 번째',
+      hashtags: [],
+      locationTag: null,
+    });
+
+    const after = await users.me();
+    const mine = await feed.postsBy(after.id);
+
+    expect(after.postCount).toBe(before.postCount + 1);
+    expect(mine.map((p) => p.id)).toContain(created.id);
+  });
+
+  it('새 글에도 댓글을 달 수 있다', async () => {
+    const created = await feed.createPost({
+      mediaIds: [],
+      body: '댓글 받을 글',
+      hashtags: [],
+      locationTag: null,
+    });
+
+    await feed.addComment(created.id, '축하해요');
+    const comments = await feed.comments(created.id);
+
+    expect(comments.map((c) => c.body)).toEqual(['축하해요']);
+  });
+});
