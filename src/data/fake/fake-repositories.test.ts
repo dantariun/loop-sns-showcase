@@ -1,7 +1,10 @@
-import { db } from './db';
+import { db, resetDb } from './db';
 import { fakeRepositories } from './fake-repositories';
 
 const { feed, users, chat, notifications, search } = fakeRepositories;
+
+// 저장소는 모듈 전역 상태다 — 케이스마다 시드로 되돌려 서로 간섭하지 않게 한다
+beforeEach(resetDb);
 
 describe('FeedRepository', () => {
   it('피드는 최신순으로 내려온다', async () => {
@@ -61,6 +64,50 @@ describe('UserRepository', () => {
     await users.toggleFollow('u2');
     const after = await users.me();
     expect(after.followingCount).toBe(before.followingCount + 1);
+  });
+
+  it('프로필을 수정하면 내가 쓴 게시물의 작성자 이름도 바뀐다', async () => {
+    const me = await users.me();
+    await feed.createPost({ mediaIds: [], body: '내 글', hashtags: [], locationTag: null });
+
+    await users.updateMe({ handle: 'newhandle', displayName: '새이름', bio: '새 소개' });
+
+    const after = await users.me();
+    expect(after.handle).toBe('newhandle');
+    expect(after.displayName).toBe('새이름');
+
+    // 작성자는 게시물에 복사돼 들어가 있다 — 같이 갱신되지 않으면 화면끼리 어긋난다
+    const mine = await feed.postsBy(me.id);
+    expect(mine.every((post) => post.author.displayName === '새이름')).toBe(true);
+  });
+
+  it('앞뒤 공백은 저장 전에 잘라낸다', async () => {
+    const after = await users.updateMe({
+      handle: '  spaced  ',
+      displayName: '  이름  ',
+      bio: '  소개  ',
+    });
+
+    expect(after.handle).toBe('spaced');
+    expect(after.displayName).toBe('이름');
+    expect(after.bio).toBe('소개');
+  });
+
+  it('남이 쓰는 아이디로는 바꿀 수 없다', async () => {
+    const other = await users.user('u1');
+    const before = await users.me();
+
+    await expect(
+      users.updateMe({
+        handle: other?.handle ?? '',
+        displayName: before.displayName,
+        bio: before.bio,
+      }),
+    ).rejects.toThrow('이미 사용 중인 아이디입니다');
+
+    // 거절됐으면 아무것도 바뀌지 않아야 한다
+    const after = await users.me();
+    expect(after.handle).toBe(before.handle);
   });
 });
 

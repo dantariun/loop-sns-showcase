@@ -90,8 +90,16 @@ export function ProfileView({ userId, showBack = false }: { userId: string; show
               <Avatar seed={user.id} name={user.displayName} size="lg" />
               <View className="flex-1 flex-row justify-around">
                 <Metric label="게시물" value={user.postCount} />
-                <Metric label="팔로워" value={user.followerCount} />
-                <Metric label="팔로잉" value={user.followingCount} />
+                <Metric
+                  label="팔로워"
+                  value={user.followerCount}
+                  onPress={() => router.push(`/profile/relations?userId=${user.id}&tab=followers`)}
+                />
+                <Metric
+                  label="팔로잉"
+                  value={user.followingCount}
+                  onPress={() => router.push(`/profile/relations?userId=${user.id}&tab=following`)}
+                />
               </View>
             </View>
 
@@ -106,7 +114,10 @@ export function ProfileView({ userId, showBack = false }: { userId: string; show
             {/* 액션 */}
             <View className="flex-row gap-2 px-screen pt-4">
               {user.isMe ? (
-                <Pressable className="h-10 flex-1 items-center justify-center rounded-lg bg-surface">
+                <Pressable
+                  className="h-10 flex-1 items-center justify-center rounded-lg bg-surface"
+                  onPress={() => router.push('/profile/edit')}
+                >
                   <Text className="text-sm font-semibold text-content">프로필 편집</Text>
                 </Pressable>
               ) : (
@@ -143,12 +154,26 @@ export function ProfileView({ userId, showBack = false }: { userId: string; show
   );
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
-  return (
-    <View className="items-center">
+/** 지표 한 칸. onPress 를 받으면 누를 수 있는 지표가 된다 (팔로워·팔로잉). */
+function Metric({ label, value, onPress }: { label: string; value: number; onPress?: () => void }) {
+  const body = (
+    <>
       <Text className="text-base font-bold text-content">{compactCount(value)}</Text>
       <Text className="text-xs text-content-hint">{label}</Text>
-    </View>
+    </>
+  );
+
+  if (!onPress) return <View className="items-center">{body}</View>;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${label} ${value}명 보기`}
+      onPress={onPress}
+      className="items-center"
+    >
+      {body}
+    </Pressable>
   );
 }
 

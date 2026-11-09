@@ -139,6 +139,23 @@ const users: UserRepository = {
   async following(userId) {
     return delay(db.users.filter((u) => u.id !== userId && u.isFollowing));
   },
+
+  async updateMe(patch) {
+    const handle = patch.handle.trim();
+    const taken = db.users.some((u) => u.id !== db.me.id && u.handle === handle);
+    if (taken) throw new Error('이미 사용 중인 아이디입니다');
+
+    const next: User = {
+      ...db.me,
+      handle,
+      displayName: patch.displayName.trim(),
+      bio: patch.bio.trim(),
+    };
+    // 내 이름은 게시물·댓글·대화방에도 박혀 있다 — 한 번에 갈아끼운다
+    syncUserEverywhere(next);
+
+    return delay(next);
+  },
 };
 
 const notifications: NotificationRepository = {

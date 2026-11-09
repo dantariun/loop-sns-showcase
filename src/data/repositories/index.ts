@@ -35,6 +35,13 @@ export interface FeedRepository {
   createPost(draft: NewPostDraft): Promise<Post>;
 }
 
+/** 프로필 편집 화면이 모아 보내는 수정분 */
+export interface ProfilePatch {
+  handle: string;
+  displayName: string;
+  bio: string;
+}
+
 export interface UserRepository {
   me(): Promise<User>;
   user(id: string): Promise<User | null>;
@@ -42,6 +49,8 @@ export interface UserRepository {
   toggleFollow(userId: string): Promise<User>;
   followers(userId: string): Promise<User[]>;
   following(userId: string): Promise<User[]>;
+  /** 내 프로필 수정 — handle 이 이미 쓰이고 있으면 거절한다 */
+  updateMe(patch: ProfilePatch): Promise<User>;
 }
 
 export interface NotificationRepository {

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { repositories } from '@/data';
 import { qk } from '@/data/query-keys';
+import type { ProfilePatch } from '@/data/repositories';
 import type { User } from '@/entities';
 
 export function useMe() {
@@ -79,6 +80,34 @@ export function useToggleFollow() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: qk.users.me() });
       queryClient.invalidateQueries({ queryKey: qk.search.suggested() });
+    },
+  });
+}
+
+/**
+ * 내 프로필 수정.
+ *
+ * 낙관적 업데이트를 쓰지 않는다 — 아이디 중복으로 거절될 수 있어서,
+ * 서버가 확정한 결과만 캐시에 반영하는 쪽이 맞다.
+ *
+ * 내 이름·아이디는 게시물 작성자·댓글 작성자·대화 상대에도 박혀 있다.
+ * 그래서 users 뿐 아니라 posts·chat 까지 무효화한다.
+ */
+export function useUpdateMe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (patch: ProfilePatch) => repositories.users.updateMe(patch),
+
+    onSuccess: (next) => {
+      queryClient.setQueryData<User>(qk.users.me(), next);
+      queryClient.setQueryData<User | null>(qk.users.detail(next.id), next);
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.users.all });
+      queryClient.invalidateQueries({ queryKey: qk.posts.all });
+      queryClient.invalidateQueries({ queryKey: qk.chat.all });
     },
   });
 }
