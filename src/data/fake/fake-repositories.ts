@@ -1,4 +1,4 @@
-import type { Comment, Message, Post, User } from '@/entities';
+import type { AppNotification, Comment, Message, Post, User } from '@/entities';
 import type {
   ChatRepository,
   FeedRepository,
@@ -169,6 +169,20 @@ const notifications: NotificationRepository = {
 
   async markAllRead() {
     db.notifications = db.notifications.map((n) => (n.read ? n : { ...n, read: true }));
+    return delay(undefined);
+  },
+
+  async markRead(id) {
+    const target = db.notifications.find((n) => n.id === id);
+    if (!target) throw new Error(`알림 없음: ${id}`);
+
+    const next: AppNotification = { ...target, read: true };
+    db.notifications = replaceById(db.notifications, next);
+    return delay(next);
+  },
+
+  async remove(id) {
+    db.notifications = db.notifications.filter((n) => n.id !== id);
     return delay(undefined);
   },
 };

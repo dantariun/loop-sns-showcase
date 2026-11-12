@@ -1,8 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
 import { Tabs, useRouter } from 'expo-router';
 import { Bell, Home, PlusSquare, Search, User } from 'lucide-react-native';
-import { repositories } from '@/data';
-import { qk } from '@/data/query-keys';
+import { useUnreadCount } from '@/features/activity/use-notifications';
 import { useThemeColor } from '@/shared/lib/use-theme-color';
 
 /**
@@ -19,10 +17,7 @@ export default function TabsLayout() {
   const bg = useThemeColor('bg');
   const border = useThemeColor('border');
 
-  const { data: unread = 0 } = useQuery({
-    queryKey: qk.notifications.unreadCount(),
-    queryFn: () => repositories.notifications.unreadCount(),
-  });
+  const { data: unread = 0 } = useUnreadCount();
 
   return (
     <Tabs

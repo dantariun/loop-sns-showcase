@@ -57,6 +57,10 @@ export interface NotificationRepository {
   notifications(): Promise<AppNotification[]>;
   unreadCount(): Promise<number>;
   markAllRead(): Promise<void>;
+  /** 알림 한 건을 읽음 처리 — 목록에서 눌렀을 때 */
+  markRead(id: string): Promise<AppNotification>;
+  /** 알림 한 건 삭제 — 스와이프 */
+  remove(id: string): Promise<void>;
 }
 
 export interface ChatRepository {

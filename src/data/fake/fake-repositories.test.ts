@@ -117,6 +117,29 @@ describe('NotificationRepository', () => {
     await notifications.markAllRead();
     expect(await notifications.unreadCount()).toBe(0);
   });
+
+  it('한 건만 읽으면 미읽음이 그만큼만 줄어든다', async () => {
+    const before = await notifications.unreadCount();
+    const target = (await notifications.notifications()).find((n) => !n.read);
+    if (!target) throw new Error('미읽음 알림이 시드에 없습니다');
+
+    const next = await notifications.markRead(target.id);
+
+    expect(next.read).toBe(true);
+    expect(await notifications.unreadCount()).toBe(before - 1);
+  });
+
+  it('삭제하면 목록에서 빠지고 미읽음도 함께 줄어든다', async () => {
+    const before = await notifications.unreadCount();
+    const target = (await notifications.notifications()).find((n) => !n.read);
+    if (!target) throw new Error('미읽음 알림이 시드에 없습니다');
+
+    await notifications.remove(target.id);
+
+    const list = await notifications.notifications();
+    expect(list.map((n) => n.id)).not.toContain(target.id);
+    expect(await notifications.unreadCount()).toBe(before - 1);
+  });
 });
 
 describe('ChatRepository', () => {
